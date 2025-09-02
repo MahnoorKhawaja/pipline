@@ -37,7 +37,7 @@ app.post('/upload', function(req, res, next) {
     });
 });
 
-const PORT = 3000;
+const PORT = 22;
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
