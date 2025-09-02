@@ -1,0 +1,30 @@
+name: Deploy Node.js App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.1
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          cd ~/nodejs-simple-file-upload || git clone https://github.com/${{ github.repository }} ~/nodejs-simple-file-upload
+          cd ~/nodejs-simple-file-upload
+          git pull origin main
+          npm install
+          mkdir -p uploads
+          pm2 restart server.js || pm2 start server.js --name 'nodejs-simple-file-upload'
+        "
