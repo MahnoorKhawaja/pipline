@@ -1,5 +1,6 @@
 name: Deploy Node.js App to EC2
 
+# Trigger workflow on push to main branch
 on:
   push:
     branches:
@@ -10,21 +11,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.8.1
-      with:
-        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+      # Step 2: Setup SSH agent
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0   # Correct version
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-    - name: Deploy to EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
-          cd ~/nodejs-simple-file-upload || git clone https://github.com/${{ github.repository }} ~/nodejs-simple-file-upload
-          cd ~/nodejs-simple-file-upload
-          git pull origin main
-          npm install
-          mkdir -p uploads
-          pm2 restart server.js || pm2 start server.js --name 'nodejs-simple-file-upload'
-        "
+      # Step 3: Add GitHub to known hosts (avoid authenticity prompt)
+      - name: Add GitHub to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      # Step 4: Deploy to EC2
+      - name: Deploy to EC2
+        run: |
+          echo "Connecting to EC2..."
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+            echo 'SSH connection established'
+            
+            # Navigate or clone repo
+            cd ~/nodejs-simple-file-upload || git clone https://github.com/${{ github.repository }} ~/nodejs-simple-file-upload
+            cd ~/nodejs-simple-file-upload
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Install dependencies
+            npm install
+            
+            # Ensure uploads folder exists
+            mkdir -p uploads
+            
+            # Start or restart app with PM2
+            pm2 restart server.js || pm2 start server.js --name 'nodejs-simple-file-upload'
+            
+            # Show PM2 status for verification
+            pm2 status
+          "
