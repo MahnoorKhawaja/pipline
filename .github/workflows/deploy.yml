@@ -17,11 +17,11 @@ jobs:
 
       # Step 2: Setup SSH agent
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0   # Correct version
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      # Step 3: Add GitHub to known hosts (avoid authenticity prompt)
+      # Step 3: Add GitHub to known hosts
       - name: Add GitHub to known hosts
         run: |
           mkdir -p ~/.ssh
@@ -32,24 +32,44 @@ jobs:
         run: |
           echo "Connecting to EC2..."
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+            
             echo 'SSH connection established'
-            
-            # Navigate or clone repo
-            cd ~/nodejs-simple-file-upload || git clone https://github.com/${{ github.repository }} ~/nodejs-simple-file-upload
-            cd ~/nodejs-simple-file-upload
-            
+
+            # Update system and install prerequisites
+            sudo apt update -y
+            sudo apt install -y git curl build-essential
+
+            # Install Node.js LTS (18) if not installed
+            if ! command -v node >/dev/null 2>&1; then
+              curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+              sudo apt install -y nodejs
+            fi
+
+            # Install PM2 globally if not installed
+            if ! command -v pm2 >/dev/null 2>&1; then
+              sudo npm install -g pm2
+            fi
+
+            # Clone repo if folder doesn't exist
+            cd ~
+            if [ ! -d 'nodejs-simple-file-upload' ]; then
+              git clone https://github.com/${{ github.repository }} nodejs-simple-file-upload
+            fi
+            cd nodejs-simple-file-upload
+
             # Pull latest changes
             git pull origin main
-            
-            # Install dependencies
+
+            # Install npm dependencies
             npm install
-            
+
             # Ensure uploads folder exists
             mkdir -p uploads
-            
+
             # Start or restart app with PM2
-            pm2 restart server.js || pm2 start server.js --name 'nodejs-simple-file-upload'
-            
+            pm2 restart server.js || pm2 start server.js --name 'nodejs-app'
+            pm2 save
+
             # Show PM2 status for verification
             pm2 status
           "
