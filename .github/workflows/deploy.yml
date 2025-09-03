@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -30,9 +30,9 @@ jobs:
       # Step 4: Deploy to EC2
       - name: Deploy to EC2
         run: |
-          echo "Connecting to EC2..."
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
-            
+            set -e  # Exit on any error
+
             echo 'SSH connection established'
 
             # Update system and install prerequisites
@@ -50,7 +50,7 @@ jobs:
               sudo npm install -g pm2
             fi
 
-            # Clone repo if folder doesn't exist
+            # Navigate to home and clone repo if it doesn't exist
             cd ~
             if [ ! -d 'nodejs-simple-file-upload' ]; then
               git clone https://github.com/${{ github.repository }} nodejs-simple-file-upload
