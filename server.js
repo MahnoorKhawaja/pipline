@@ -33,7 +33,7 @@ app.post('/upload', function(req, res, next) {
             console.error(err);
             return res.status(500).send("Something went wrong!");
         }
-        res.send("Upload completeddd.");
+        res.send("Upload completeddddd.");
     });
 });
 
