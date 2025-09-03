@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository (for GitHub Actions workspace)
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -49,24 +49,13 @@ jobs:
               sudo npm install -g pm2
             fi
 
-            # Define deployment folder
+            # Navigate to deployment folder
             DEPLOY_DIR=~/pipline
-
-            # Clone or pull repo
-            if [ ! -d \"$DEPLOY_DIR\" ]; then
-                git clone https://github.com/MahnoorKhawaja/pipline $DEPLOY_DIR
-            else
-                cd $DEPLOY_DIR
-                if [ -d \".git\" ]; then
-                    git reset --hard
-                    git pull origin main
-                else
-                    rm -rf $DEPLOY_DIR
-                    git clone https://github.com/MahnoorKhawaja/pipline $DEPLOY_DIR
-                fi
-            fi
-
             cd $DEPLOY_DIR
+
+            # Pull latest changes
+            git reset --hard
+            git pull origin main
 
             # Install npm dependencies
             npm install
