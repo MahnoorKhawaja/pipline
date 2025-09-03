@@ -49,11 +49,20 @@ jobs:
               sudo npm install -g pm2
             fi
 
-            # Navigate to home (or deploy folder)
-            cd ~
+            # Deploy folder
+            DEPLOY_DIR=~/nodejs-app
 
-            # Pull latest repo changes directly to home, or clone if not exists
-            git pull https://github.com/MahnoorKhawaja/pipline main || git clone https://github.com/MahnoorKhawaja/pipline .
+            # Clone fresh if folder doesn't exist or is not a git repo
+            if [ ! -d \"$DEPLOY_DIR/.git\" ]; then
+              rm -rf $DEPLOY_DIR
+              git clone https://github.com/MahnoorKhawaja/pipline $DEPLOY_DIR
+            else
+              cd $DEPLOY_DIR
+              git reset --hard
+              git pull origin main
+            fi
+
+            cd $DEPLOY_DIR
 
             # Install npm dependencies
             npm install
