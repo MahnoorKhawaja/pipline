@@ -1,6 +1,5 @@
 name: Deploy Node.js App to EC2
 
-# Trigger workflow on push to main branch
 on:
   push:
     branches:
@@ -50,15 +49,11 @@ jobs:
               sudo npm install -g pm2
             fi
 
-            # Navigate to home and clone repo if it doesn't exist
+            # Navigate to home (or deploy folder)
             cd ~
-            if [ ! -d 'nodejs-simple-file-upload' ]; then
-              git clone https://github.com/MahnoorKhawaja/pipline
-            fi
-            cd nodejs-simple-file-upload
 
-            # Pull latest changes
-            git pull origin main
+            # Pull latest repo changes directly to home, or clone if not exists
+            git pull https://github.com/MahnoorKhawaja/pipline main || git clone https://github.com/MahnoorKhawaja/pipline .
 
             # Install npm dependencies
             npm install
