@@ -53,7 +53,7 @@ jobs:
             # Navigate to home and clone repo if it doesn't exist
             cd ~
             if [ ! -d 'nodejs-simple-file-upload' ]; then
-              git clone https://github.com/${{ github.repository }} nodejs-simple-file-upload
+              git clone https://github.com/MahnoorKhawaja/pipline
             fi
             cd nodejs-simple-file-upload
 
