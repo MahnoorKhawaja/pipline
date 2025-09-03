@@ -37,7 +37,9 @@ app.post('/upload', function(req, res, next) {
     });
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+// Use the PORT environment variable if provided, otherwise default to 3000
+const port = process.env.PORT || 3000;
+
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running at http://0.0.0.0:${port}`);
 });
